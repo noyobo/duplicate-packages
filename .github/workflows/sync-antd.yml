@@ -41,12 +41,14 @@ jobs:
           fi
 
       - name: Fetch antd package
+        if: env.should_publish == 'true'
         run: |
           mkdir antd
           cd antd
           npm pack antd
 
       - name: Extract and modify package
+        if: env.should_publish == 'true'
         run: |
           cd antd
           tar -xzf antd-*.tgz
