@@ -1,4 +1,4 @@
-name: Update and Publish @noyobo/antd
+name: Sync packages
 
 on:
   schedule:
@@ -8,6 +8,10 @@ on:
 jobs:
   update-and-publish:
     runs-on: macos-latest
+
+    strategy:
+      matrix:
+        package: [antd]
 
     steps:
       - name: Checkout repository
@@ -23,13 +27,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-      - name: Get current version of @noyobo/antd
+      - name: Get current version of @noyobo/${{ matrix.package }}
         id: current-version
-        run: echo "current_version=$(npm show @noyobo/antd version || echo '0.0.0')" >> $GITHUB_ENV
+        run: echo "current_version=$(npm show @noyobo/${{ matrix.package }} version || echo '0.0.0')" >> $GITHUB_ENV
 
-      - name: Get latest version of antd
+      - name: Get latest version of ${{ matrix.package }}
         id: latest-version
-        run: echo "latest_version=$(npm show antd version)" >> $GITHUB_ENV
+        run: echo "latest_version=$(npm show ${{ matrix.package }} version)" >> $GITHUB_ENV
 
       - name: Compare versions
         id: compare-versions
@@ -40,34 +44,34 @@ jobs:
             echo "should_publish=false" >> $GITHUB_ENV
           fi
 
-      - name: Fetch antd package
+      - name: Fetch ${{ matrix.package }} package
         if: env.should_publish == 'true'
         run: |
-          mkdir antd
-          cd antd
-          npm pack antd
+          mkdir ${{ matrix.package }}
+          cd ${{ matrix.package }}
+          npm pack ${{ matrix.package }}
 
       - name: Extract and modify package
         if: env.should_publish == 'true'
         run: |
-          cd antd
-          tar -xzf antd-*.tgz
+          cd ${{ matrix.package }}
+          tar -xzf ${{ matrix.package }}-*.tgz
           ls -al ./package
-          sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package/package.json
+          sed -i '' 's/"name": "${{ matrix.package }}"/"name": "@noyobo\/${{ matrix.package }}"/' package/package.json
           sed -i '' '/"scripts": {/,/},/d' package/package.json
           cat package/package.json
 
       - name: Publish to scope @noyobo
         if: env.should_publish == 'true'
         run: |
-          cd antd/package
+          cd ${{ matrix.package }}/package
           cat package.json
           npm whoami
           npm publish --access public
 
-      - name: Latest version of @noyobo/antd
+      - name: Latest version of @noyobo/${{ matrix.package }}
         if: env.should_publish == 'true'
         run: |
-          version=$(npm show @noyobo/antd version)
+          version=$(npm show @noyobo/${{ matrix.package }} version)
           major_version=$(echo ${version} | cut -d '.' -f 1)
-          npm dist-tag add @noyobo/antd@$version latest-$major_version
+          npm dist-tag add @noyobo/${{ matrix.package }}@$version latest-$major_version
