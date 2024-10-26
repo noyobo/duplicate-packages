@@ -41,5 +41,4 @@ jobs:
 
       - name: Duplicate package to scope @noyobo
         if: env.should_publish == 'true'
-        run: |
-          make sync-antd
+        run: make sync-antd
