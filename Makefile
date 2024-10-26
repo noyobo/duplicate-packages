@@ -3,8 +3,7 @@
 sync-antd:
 	npm whoami
 	mkdir antd
-	cd antd && npm pack antd && tar -xzf antd-*.tgz && sleep 10 && ls -al
-
+	cd antd && npm pack antd && tar -xzf antd-*.tgz && cd package && ls -al
 #	sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package.json && \
 #	sed -i '' '/"scripts": {/,/},/d' package.json && \
 #	npm publish --access public
