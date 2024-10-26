@@ -64,3 +64,10 @@ jobs:
           cat package.json
           npm whoami
           npm publish --access public
+
+      - name: Latest version of @noyobo/antd
+        if: env.should_publish == 'true'
+        run: |
+          version=$(npm show @noyobo/antd version)
+          major_version=$(echo ${version} | cut -d '.' -f 1)
+          npm dist-tag add @noyobo/antd@$version latest-$major_version
