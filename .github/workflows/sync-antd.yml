@@ -25,16 +25,16 @@ jobs:
 
       - name: Get current version of @noyobo/antd
         id: current-version
-        run: echo "version=$(npm show @noyobo/antd version || echo '0.0.0')" >> $GITHUB_ENV
+        run: echo "current_version=$(npm show @noyobo/antd version || echo '0.0.0')" >> $GITHUB_ENV
 
       - name: Get latest version of antd
         id: latest-version
-        run: echo "version=$(npm show antd version)" >> $GITHUB_ENV
+        run: echo "latest_version=$(npm show antd version)" >> $GITHUB_ENV
 
       - name: Compare versions
         id: compare-versions
         run: |
-          if [ "${{ env.current-version }}" != "${{ env.latest-version }}" ]; then
+          if [ "${{ env.current_version }}" != "${{ env.latest_version }}" ]; then
             echo "should_publish=true" >> $GITHUB_ENV
           else
             echo "should_publish=false" >> $GITHUB_ENV
