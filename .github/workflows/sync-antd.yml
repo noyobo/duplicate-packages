@@ -40,6 +40,25 @@ jobs:
             echo "should_publish=false" >> $GITHUB_ENV
           fi
 
-      - name: Duplicate package to scope @noyobo
+      - name: Fetch antd package
+        run: |
+          mkdir antd
+          cd antd
+          npm pack antd
+
+      - name: Extract and modify package
+        run: |
+          cd antd
+          tar -xzf antd-*.tgz
+          ls -al ./package
+          sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package/package.json
+          sed -i '' '/"scripts": {/,/},/d' package/package.json
+          cat package/package.json
+
+      - name: Publish to scope @noyobo
         if: env.should_publish == 'true'
-        run: make sync-antd
+        run: |
+          cd antd/package
+          cat package.json
+          npm whoami
+          npm publish --access public
