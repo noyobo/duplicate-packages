@@ -40,25 +40,7 @@ jobs:
             echo "::set-output name=should-publish::false"
           fi
 
-      - name: Fetch antd package
+      - name: Duplicate package to scope @noyobo
         if: steps.compare-versions.outputs.should-publish == 'true'
         run: |
-          mkdir antd
-          cd antd
-          npm pack antd
-          ls -l # List files to verify the .tgz file is created
-
-      - name: Extract and modify package
-        if: steps.compare-versions.outputs.should-publish == 'true'
-        run: |
-          cd antd
-          tar -xzf antd-*.tgz
-          cd package
-          sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package.json
-          sed -i '' '/"scripts": {/,/},/d' package.json
-
-      - name: Publish modified package
-        if: steps.compare-versions.outputs.should-publish == 'true'
-        run: |
-          cd antd/package
-          npm publish --access public
+          make sync-antd

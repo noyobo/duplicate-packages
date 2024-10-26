@@ -1,4 +1,14 @@
+:PHONY: sync-antd sync-antd-dry
+
 sync-antd:
+	npm whoami
+	mkdir antd
+	cd antd && npm pack antd && tar -xzf antd-*.tgz && sleep 10 && \
+	sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package.json && \
+	sed -i '' '/"scripts": {/,/},/d' package.json && \
+	npm publish --access public
+
+sync-antd-dry:
 	rm -rf antd package
 	mkdir antd
 	cd antd && npm pack antd && tar -xzf antd-*.tgz && cd package && \
