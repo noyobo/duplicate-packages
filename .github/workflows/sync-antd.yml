@@ -1,0 +1,64 @@
+name: Update and Publish @noyobo/antd
+
+on:
+  schedule:
+    - cron: '0 */4 * * *' # Run every 4 hours
+  workflow_dispatch:
+
+jobs:
+  update-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Login to npm
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Get current version of @noyobo/antd
+        id: current-version
+        run: echo "::set-output name=version::$(npm show @noyobo/antd version || echo '0.0.0')"
+
+      - name: Get latest version of antd
+        id: latest-version
+        run: echo "::set-output name=version::$(npm show antd version)"
+
+      - name: Compare versions
+        id: compare-versions
+        run: |
+          if [ "${{ steps.current-version.outputs.version }}" != "${{ steps.latest-version.outputs.version }}" ]; then
+            echo "::set-output name=should-publish::true"
+          else
+            echo "::set-output name=should-publish::false"
+          fi
+
+      - name: Fetch antd package
+        if: steps.compare-versions.outputs.should-publish == 'true'
+        run: |
+          mkdir antd
+          cd antd
+          npm pack antd
+          ls -l # List files to verify the .tgz file is created
+
+      - name: Extract and modify package
+        if: steps.compare-versions.outputs.should-publish == 'true'
+        run: |
+          cd antd
+          tar -xzf antd-*.tgz
+          cd package
+          sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package.json
+          sed -i '' '/"scripts": {/,/},/d' package.json
+
+      - name: Publish modified package
+        if: steps.compare-versions.outputs.should-publish == 'true'
+        run: |
+          cd antd/package
+          npm publish --access public
