@@ -7,7 +7,7 @@ on:
 
 jobs:
   update-and-publish:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
@@ -25,22 +25,42 @@ jobs:
 
       - name: Get current version of @noyobo/antd
         id: current-version
-        run: echo "::set-output name=version::$(npm show @noyobo/antd version || echo '0.0.0')"
+        run: echo "current_version=$(npm show @noyobo/antd version || echo '0.0.0')" >> $GITHUB_ENV
 
       - name: Get latest version of antd
         id: latest-version
-        run: echo "::set-output name=version::$(npm show antd version)"
+        run: echo "latest_version=$(npm show antd version)" >> $GITHUB_ENV
 
       - name: Compare versions
         id: compare-versions
         run: |
-          if [ "${{ steps.current-version.outputs.version }}" != "${{ steps.latest-version.outputs.version }}" ]; then
-            echo "::set-output name=should-publish::true"
+          if [ "${{ env.current_version }}" != "${{ env.latest_version }}" ]; then
+            echo "should_publish=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=should-publish::false"
+            echo "should_publish=false" >> $GITHUB_ENV
           fi
 
-      - name: Duplicate package to scope @noyobo
-        if: steps.compare-versions.outputs.should-publish == 'true'
+      - name: Fetch antd package
+        if: env.should_publish == 'true'
         run: |
-          make sync-antd
+          mkdir antd
+          cd antd
+          npm pack antd
+
+      - name: Extract and modify package
+        if: env.should_publish == 'true'
+        run: |
+          cd antd
+          tar -xzf antd-*.tgz
+          ls -al ./package
+          sed -i '' 's/"name": "antd"/"name": "@noyobo\/antd"/' package/package.json
+          sed -i '' '/"scripts": {/,/},/d' package/package.json
+          cat package/package.json
+
+      - name: Publish to scope @noyobo
+        if: env.should_publish == 'true'
+        run: |
+          cd antd/package
+          cat package.json
+          npm whoami
+          npm publish --access public
