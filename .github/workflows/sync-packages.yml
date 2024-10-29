@@ -68,10 +68,5 @@ jobs:
           cat package.json
           npm whoami
           npm publish --access public
-
-      - name: Latest version of @noyobo/${{ matrix.package }}
-        if: env.should_publish == 'true'
-        run: |
-          version=$(npm show @noyobo/${{ matrix.package }} version)
-          major_version=$(echo ${version} | cut -d '.' -f 1)
-          npm dist-tag add @noyobo/${{ matrix.package }}@$version latest-$major_version
+          major_version=$(echo ${{ env.latest-version }} | cut -d '.' -f 1)
+          npm dist-tag add @noyobo/${{ matrix.package }}@${{ env.latest-version }} latest-$major_version
