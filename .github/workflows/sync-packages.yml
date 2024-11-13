@@ -33,7 +33,9 @@ jobs:
 
       - name: Get latest version of ${{ matrix.package }}
         id: latest-version
-        run: echo "latest_version=$(npm show ${{ matrix.package }} version)" >> $GITHUB_ENV
+        run: |
+          echo "latest_version=$(npm show ${{ matrix.package }} version)" >> $GITHUB_ENV
+          echo "major_version=$(npm show ${{ matrix.package }} version | cut -d '.' -f 1)" >> $GITHUB_ENV
 
       - name: Compare versions
         id: compare-versions
@@ -68,5 +70,4 @@ jobs:
           cat package.json
           npm whoami
           npm publish --access public
-          major_version=$(echo ${{ env.latest-version }} | cut -d '.' -f 1)
-          npm dist-tag add @noyobo/${{ matrix.package }}@${{ env.latest-version }} latest-$major_version
+          npm dist-tag add @noyobo/${{ matrix.package }}@${{ env.latest-version }} latest-${{ env.major-version }}
