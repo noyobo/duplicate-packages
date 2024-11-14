@@ -4,7 +4,7 @@ A bot that automatically copies npm packages and publishes them
 
 ## @noyobo/antd
 
-![NPM Version](https://img.shields.io/npm/v/%40noyobo%2Fantd)
+[![npm package][npm-img]][npm-url]
 
 ```bash
 npm install @noyobo/antd
@@ -17,3 +17,6 @@ yarn add @noyobo/antd
 ```bash
 pnpm add @noyobo/antd
 ```
+
+[npm-img]:https://img.shields.io/npm/v/@noyobo/antd
+[npm-url]:https://www.npmjs.com/package/antd
