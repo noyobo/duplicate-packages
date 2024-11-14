@@ -70,4 +70,4 @@ jobs:
           cat package.json
           npm whoami
           npm publish --access public
-          npm dist-tag add @noyobo/${{ matrix.package }}@${{ env.latest-version }} latest-${{ env.major-version }}
+          npm dist-tag add @noyobo/${{ matrix.package }}@$latest_version latest-$major_version
