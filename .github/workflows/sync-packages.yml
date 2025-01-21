@@ -2,7 +2,7 @@ name: Sync packages
 
 on:
   schedule:
-    - cron: '0 */12 * * 1-5'
+    - cron: '0 0 * * 2,4'  # Tuesday and Thursday
   workflow_dispatch:
 
 jobs:
